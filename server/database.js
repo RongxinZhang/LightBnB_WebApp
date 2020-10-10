@@ -1,5 +1,13 @@
 const properties = require("./json/properties.json");
 const users = require("./json/users.json");
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  user: "vagrant",
+  password: "123",
+  host: "localhost",
+  database: "lightbnb",
+});
 
 /// Users
 
@@ -75,34 +83,30 @@ const getAllProperties = function (options = {}, limit = 10) {
   JOIN property_reviews ON properties.id = property_id
   `;
 
-  // 3
-  // if (options.owner_id) {
-  //   queryParams.push(`%${options.owner}%`);
-  //   queryString += `WHERE city LIKE $${queryParams.length} `;
-  // }
-
   if (options.owner_id) {
-    queryParams.push(`${options.owner_id}`);
+    queryParams.push(options.owner_id);
     queryString += `WHERE properties.owner_id = $${queryParams.length} `;
   }
 
   if (options.minimum_price_per_night && options.max_price_per_night) {
-    queryParams.push(`${options.minimum_price_per_night}`);
+    queryParams.push(options.minimum_price_per_night);
+
     if (queryParams.length > 1) {
-      queryString += `AND properties.minimum_price_per_night > $${queryParams.length} `;
+      queryString += `AND properties.cost_per_night > $${queryParams.length} `;
     } else {
-      queryString += `WHERE properties.minimum_price_per_night > $${queryParams.length} `;
+      queryString += `WHERE properties.cost_per_night > $${queryParams.length} `;
     }
-    queryParams.push(`${options.max_price_per_night}`);
-    queryString += `AND properties.max_price_per_night < $${queryParams.length} `;
+    queryParams.push(options.max_price_per_night);
+    queryString += `AND properties.cost_per_night < $${queryParams.length} `;
   }
 
   if (options.minimum_rating) {
-    queryParams.push(`${options.minimum_rating}`);
+    queryParams.push(options.minimum_rating);
+
     if (queryParams.length > 1) {
-      queryString += `AND properties.minimum_rating >= $${queryParams.length} `;
+      queryString += `AND property_reviews.rating >= $${queryParams.length} `;
     } else {
-      queryString += `WHERE properties.minimum_price_per_night > $${queryParams.length} `;
+      queryString += `WHERE property_reviews.rating >= $${queryParams.length} `;
     }
   }
 
@@ -138,9 +142,9 @@ const obj = {
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function (property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  // const propertyId = Object.keys(properties).length + 1;
+  // property.id = propertyId;
+  // properties[propertyId] = property;
+  // return Promise.resolve(property);
 };
 exports.addProperty = addProperty;
